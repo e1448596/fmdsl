@@ -1,0 +1,10 @@
+parent [1..3] achild;
+parent ! bchild;
+
+achild.attr in [1..5];
+bchild.attr in [1..5];
+bchild.bttr in [1..5];
+
+all_different_0(_.attr);
+sum_eq(10,bchild._);
+dummy([achild#0,bchild]);

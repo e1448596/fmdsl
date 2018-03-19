@@ -1,0 +1,132 @@
+%include {
+	#include <stdlib.h>
+	#include <assert.h>
+	#include "tree.h"
+	#include "errors.h"
+}
+%token_prefix TOKEN_
+%token_type {char*}
+%token_destructor {free($$);}
+%default_type {Tree*}
+%default_destructor {free_tree($$);}
+%extra_argument {State* state}
+%syntax_error {
+	++state->errors;
+	error_syntax(state);
+}
+
+root ::= rulelist(RL). {state->root=RL;}
+
+rulelist(RL) ::= rule(R) SCOL. {RL=append_list(new_list(TREE_RULES),R);}
+rulelist(RL2) ::= rulelist(RL1) rule(R) SCOL. {RL2=append_list(RL1,R);}
+
+rule(R) ::= adecl(E). {R=E;}
+rule(R) ::= bexpr(E). {R=to_rule(E);}
+rule(R) ::= call(C). {R=C;}
+rule(R) ::= ID(P) EX ID(C). {R=new_op(new_id(P),TREE_MANREL,new_id(C));}
+rule(R) ::= ID(P) QU ID(C). {R=new_op(new_id(P),TREE_OPTREL,new_id(C));}
+rule(R) ::= ID(P) EX ruledeps(CL). {R=new_op(new_id(P),TREE_ALTREL,CL);}
+rule(R) ::= ID(P) EX ADD ruledeps(CL). {R=new_op(new_id(P),TREE_ORREL,CL);}
+rule(R) ::= ID(P) domain(D) ID(C). {R=new_op(new_id(P),TREE_FCAR,new_id(C));R->domain=D;}
+rule(R) ::= ID(P) LT INT(L) SUB INT(U) GT ruledeps(CL). [DOT] {R=new_op(new_id(P),TREE_GCAR,CL);R->cardinality=new_domain(L,U,0);}
+
+ruledeps(CL2) ::= LBRC siblings(CL1) RBRC. {CL2=CL1;}
+siblings(CL) ::= ID(C). {CL=append_list(new_list(TREE_LIST),new_id(C));}
+siblings(CL2) ::= siblings(CL1) CMM ID(C). {CL2=append_list(CL1,new_id(C));}
+
+%type domain_r {Domain*}
+%destructor domain_r {free_domain($$);}
+
+domain_r(D) ::= LBRK INT(L) DDOT INT(U) RBRK. {D=new_domain(L,U,0);}
+domain_r(D2) ::= domain_r(D1) LBRK INT(L) DDOT INT(U) RBRK. {D2=new_domain(L,U,D1);}
+
+%type domainlist {Domain*}
+%destructor domainlist {free_domain($$);}
+
+domainlist(D) ::= INT(I). {D=new_domain_single(I,0);}
+domainlist(D2) ::= domainlist(D1) CMM INT(I). {D2=new_domain_single(I,D1);}
+
+%type domain {Domain*}
+%destructor domain {free_domain($$);}
+
+domain(D2) ::= domain_r(D1). {D2=D1;}
+domain(D2) ::= LBRC domainlist(D1) RBRC. {D2=D1;}
+
+idx(E) ::= ID(F) IDX INT(I). {E=new_op(new_id(F),TREE_IDX,new_int(I));}
+idx(E2) ::= idx(E1) IDX INT(I). {E2=new_op(E1,TREE_IDX,new_int(I));}
+
+feature(E) ::= ID(F). {E=new_id(F);}
+feature(E2) ::= idx(E1). {E2=E1;}
+
+attr(E) ::= idx(F) DOT ID(A). {E=new_op(F,TREE_ATTR,new_id(A));}
+attr(E) ::= ID(F) DOT ID(A). {E=new_op(new_id(F),TREE_ATTR,new_id(A));}
+
+adecl(E) ::= ID(F) DOT ID(A) IN domain(D). {E=to_adecl(new_op(new_id(F),TREE_ATTR,new_id(A)),D);}
+adecl(E) ::= ID(F) DOT ID(A) BOOL. {E=to_adecl(new_op(new_id(F),TREE_ATTR,new_id(A)),0);}
+
+iexpr(E2) ::= attr(E1). {E2=E1;}
+iexpr(E) ::= INT(I). {E=new_int(I);}
+iexpr(E) ::= TRUE. {E=new_bool(1);}
+iexpr(E) ::= FALSE. {E=new_bool(0);}
+iexpr(E2) ::= LPRN iexpr(E1) RPRN. {E2=E1;}
+iexpr(E3) ::= iexpr(E1) ADD iexpr(E2). {E3=new_op(E1,TREE_ADD,E2);}
+iexpr(E3) ::= iexpr(E1) SUB iexpr(E2). {E3=new_op(E1,TREE_SUB,E2);}
+iexpr(E2) ::= SUB iexpr(E1). [NOT] {E2=new_op(0,TREE_NEG,E1);}
+iexpr(E3) ::= iexpr(E1) DIV iexpr(E2). {E3=new_op(E1,TREE_DIV,E2);}
+iexpr(E3) ::= iexpr(E1) MUL iexpr(E2). {E3=new_op(E1,TREE_MUL,E2);}
+iexpr(E3) ::= iexpr(E1) MOD iexpr(E2). {E3=new_op(E1,TREE_MOD,E2);}
+
+rexpr(E2) ::= iexpr(E1). [IF] {E2=new_op(E1,TREE_CAST,0);}
+rexpr(E2) ::= LPRN rexpr(E1) RPRN. {E2=E1;}
+rexpr(E3) ::= iexpr(E1) GT iexpr(E2). {E3=new_op(E1,TREE_GT,E2);}
+rexpr(E3) ::= iexpr(E1) LT iexpr(E2). {E3=new_op(E1,TREE_LT,E2);}
+rexpr(E3) ::= iexpr(E1) GE iexpr(E2). {E3=new_op(E1,TREE_GE,E2);}
+rexpr(E3) ::= iexpr(E1) LE iexpr(E2). {E3=new_op(E1,TREE_LE,E2);}
+rexpr(E3) ::= iexpr(E1) EQ iexpr(E2). {E3=new_op(E1,TREE_EQ,E2);}
+rexpr(E3) ::= iexpr(E1) NE iexpr(E2). {E3=new_op(E1,TREE_NE,E2);}
+
+bexpr(E2) ::= feature(E1). {E2=E1;}
+bexpr(E2) ::= rexpr(E1). [IF] {E2=new_op(E1,TREE_IMPF,0);}
+bexpr(E2) ::= LPRN bexpr(E1) RPRN. {E2=E1;}
+bexpr(E3) ::= feature(E1) EXCL feature(E2). {E3=new_op(E1,TREE_NAND,E2);}
+bexpr(E2) ::= NOT bexpr(E1). {E2=new_op(0,TREE_NOT,E1);}
+bexpr(E3) ::= bexpr(E1) AND bexpr(E2). {E3=new_op(E1,TREE_AND,E2);}
+bexpr(E3) ::= bexpr(E1) OR bexpr(E2). {E3=new_op(E1,TREE_OR,E2);}
+bexpr(E3) ::= feature(E1) REQ bexpr(E2). {E3=new_op(E1,TREE_IF,E2);}
+bexpr(E3) ::= bexpr(E1) ARRW bexpr(E2). {E3=new_op(E1,TREE_IF,E2);}
+bexpr(E3) ::= IF bexpr(E1) THEN bexpr(E2). {E3=new_op(E1,TREE_IF,E2);}
+bexpr(E3) ::= bexpr(E1) DARRW bexpr(E2). {E3=new_op(E1,TREE_IFF,E2);}
+
+param(P) ::= INT(I). {P=new_int(I);}
+param(P) ::= TRUE. {P=new_bool(1);}
+param(P) ::= FALSE. {P=new_bool(0);}
+param(P) ::= COL ID(N). {P=new_unchecked_id(N);}
+param(P) ::= feature(F). {P=F;}
+param(P) ::= attr(A) OR INT(D). {P=to_param(A,D);}
+param(P) ::= attr(A). {P=to_param(A,0);}
+param(P) ::= ANON DOT ID(A). {P=new_op(0,TREE_PARAM,new_id(A));}
+param(P) ::= ANON DOT ID(A) OR INT(D). {P=to_param(new_op(0,TREE_PARAM,new_id(A)),D);}
+param(P) ::= idx(F) DOT ANON. {P=new_op(F,TREE_PARAM,0);}
+param(P) ::= idx(F) DOT ANON OR INT(D). {P=to_param(new_op(F,TREE_PARAM,0),D);}
+param(P) ::= ID(F) DOT ANON. {P=new_op(new_id(F),TREE_PARAM,0);}
+param(P) ::= ID(F) DOT ANON OR INT(D). {P=to_param(new_op(new_id(F),TREE_PARAM,0),D);}
+
+param(P) ::= LBRK paramlist(L) RBRK. {P=L;}
+
+paramlist(L) ::= param(P). {L=append_list(new_list(TREE_LIST),P);}
+paramlist(L2) ::= paramlist(L1) CMM param(P). {L2=append_list(L1,P);}
+
+call(C) ::= ID(F) LPRN paramlist(L) RPRN. {C=new_op(new_unchecked_id(F),TREE_CALL,L);}
+
+%left IF.
+%left EXCL REQ.
+%left DARRW.
+%left ARRW.
+%left OR.
+%left AND.
+%left LT GT LE GE EQ NE.
+%left ADD SUB.
+%left DIV MUL MOD.
+%right NOT.
+%left DOT IDX.
+%left RPRN.

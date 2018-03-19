@@ -1,0 +1,11 @@
+parent [1..3] achild;
+parent ! bchild;
+
+bchild.attr in [1..5];
+bchild.bttr in [1..5];
+
+alldifferent0(_.cttr);
+alldifferent0(cchild._);
+alldifferent0(bchild.cttr);
+alldifferent0(achild#1._);
+sum(10,cchild,true);

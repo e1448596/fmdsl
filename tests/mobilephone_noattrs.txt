@@ -1,0 +1,23 @@
+mobilephone ! hardware;
+
+	hardware ? connector3g;
+
+	hardware ! screen;
+	
+	hardware ! processors;
+	
+		processors [1..2] cpu;
+		
+		processors ? gpu;
+		
+	hardware ! ram;
+	
+	hardware ? gps;
+
+mobilephone ? videocall;
+
+mobilephone ? tasksched;
+
+mobilephone ? games;
+
+	games !+ {chess,tetris,race3d};

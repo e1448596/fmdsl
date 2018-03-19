@@ -1,0 +1,5 @@
+parent ? child1;
+parent ? child2;
+parent ? child3;
+
+child1 requires child2 and child3;

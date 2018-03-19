@@ -1,0 +1,40 @@
+mobilephone ! hardware;
+
+	hardware ? connector3g;
+	connector3g.speed in [2..8];
+
+	hardware ! screen;
+	screen.resolution in [1..4];
+	
+	hardware ! processors;
+	
+		processors [1..2] cpu;
+		cpu.speed in {800,1000,1600,2400};
+		
+		processors ? gpu;
+		
+	hardware ! ram;
+	ram.size in {256,512,1024,2048};
+	
+	hardware ? gps;
+
+mobilephone ? videocall;
+videocall.maxconns in [2..8];
+
+mobilephone ? tasksched;
+
+mobilephone ? games;
+
+	games !+ {chess,tetris,race3d};
+
+(cpu#0 and cpu#1) -> tasksched;
+
+if videocall.maxconns>=4
+then videocall requires
+	(screen.resolution>=3 and connector3g.speed>=6);
+	
+race3d requires gpu and ram.size>=512 or ram.size>=1024;
+
+if screen.resolution<3 then screen excludes gps;
+
+tasksched requires cpu#0.speed>=cpu#1.speed;

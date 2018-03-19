@@ -1,0 +1,12 @@
+void error_syntax(State* state);
+void error_lex(State* state);
+void error_attr_feature_missing(char* feature,char* attr);
+void error_expr_undefined(char* feature,int* selector,int slength,char* attr);
+void error_feature_dupe(char* feature,char* parent,char* newparent);
+void error_multiple_roots(char* name);
+void error_cycle(char* name);
+void error_domain_bounds(Domain* domain);
+void error_attribute_dupe(char* feature,char* attr);
+void error_wrong_cardinality(Domain* d,int max);
+void error_has_no_attr(char* feature);
+void error_attr_undefined(char* attr);

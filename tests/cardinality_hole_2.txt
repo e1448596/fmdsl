@@ -1,0 +1,1 @@
+parent {0,2,4} child;

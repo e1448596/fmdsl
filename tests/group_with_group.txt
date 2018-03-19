@@ -1,0 +1,2 @@
+parent <2-4> {child1,child2,child3,child4};
+child1 <2-4> {grandchild1,grandchild2,grandchild3,grandchild4};

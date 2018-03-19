@@ -1,0 +1,5 @@
+parent ? child1;
+parent ? child2;
+parent ? child3;
+
+child1 <-> child2 and child3;

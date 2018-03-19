@@ -1,0 +1,2 @@
+parent ! {child1,child2};
+child1 <2-3> {grandchild1,grandchild2,grandchild3,grandchild4};

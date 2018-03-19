@@ -1,0 +1,9 @@
+parent <2-3> {child0,child1,child2};
+
+child0.attr in [1..5];
+child2.attr in {2,4,6};
+child1.attr boolean;
+
+child0.attr+1 == child2.attr or not child1;
+
+if child1.attr then child2.attr==2;

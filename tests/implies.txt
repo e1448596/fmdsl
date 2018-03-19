@@ -1,0 +1,6 @@
+parent ? child1;
+parent ? child2;
+parent ? child3;
+parent ? child4;
+
+if child1 and child2 then child3 and child4;

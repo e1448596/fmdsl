@@ -1,0 +1,42 @@
+CC :=  gcc
+
+CFLAGS := -g -Wall
+
+SRC := grammar.c lexer.c $(wildcard *.c)
+
+.PHONY: all
+all: compiler
+
+compiler: $(SRC:%.c=%.o)
+
+makestring.exe: makestring._c
+	$(CC) -x c $< -o $@
+
+-include deps
+
+deps: $(SRC)
+	$(CC) -MM -MG $^ > $@
+
+%.h %.c: %.lm
+	lemon -s $< -T$(shell where /F lempar.c)
+
+%.c: %.rl
+	ragel $<
+
+%_string.h: %.* makestring.exe
+	makestring $< $@ $*
+
+.PHONY: clean
+clean:
+	-del *.o
+	-del *_string.h
+	-del compiler.exe
+	-del makestring.exe
+
+.PHONY: veryclean
+veryclean: clean
+	-del deps
+	-del grammar.h
+	-del grammar.c
+	-del grammar.out
+	-del lexer.c

@@ -1,0 +1,2 @@
+parent [2..3] child;
+child <2-3> {grandchild1,grandchild2,grandchild3,grandchild4};

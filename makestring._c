@@ -1,0 +1,32 @@
+#include <stdio.h>
+
+int main(int argc,char** argv){
+	FILE* input=fopen(argv[1],"r");
+	FILE* output=fopen(argv[2],"w");
+	
+	fprintf(output,"static const char* %s=\n\"",argv[3]);
+	int c=fgetc(input);
+	while(c!=EOF){
+		switch(c){
+		case '"':
+			fprintf(output,"\\\"");
+			break;
+		case '\\':
+			fprintf(output,"\\\\");
+			break;
+		case '\n':
+			fprintf(output,"\\n\"\n\"");
+			break;
+		case '\t':
+			fprintf(output,"\\t");
+			break;
+		default:
+			fputc(c,output);
+		}
+		c=fgetc(input);
+	}
+	fclose(input);
+	fprintf(output,"\";\n");
+	fclose(output);
+	return 0;
+}

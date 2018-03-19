@@ -1,0 +1,177 @@
+bike ! frame;
+bike [2..2] wheel;
+bike ! drivetrain;
+bike [2..2] brake;
+bike ! seat;
+bike ? accessories;
+
+bike.total_cost in [1..100000];
+sum_eq(bike.total_cost,_.cost);
+
+wheel ! rim;
+wheel ! spokes;
+wheel ! hub;
+wheel ! {tire,solidtire};
+
+hub ? brakedisc;
+
+tire ! tube;
+
+drivetrain ! {chain,belt};
+drivetrain [0..2] shifter;
+drivetrain ! crankset;
+drivetrain ! {sprockets,pulley};
+drivetrain ? tensioner;
+
+crankset ! {chainrings,crankpulley};
+
+shifter ? derailleur;
+
+seat ! seatpost; seat ! saddle;
+
+/* Material
+	1 steel
+	2 aluminium
+	3 cabon fiber
+*/
+frame.material in [1..3];
+frame.hasdisc boolean;
+frame.weight in [4000..8000];
+frame.cost in [100..1000];
+
+rim.material in [2..3];
+rim.diameter in {16,20,24,26};
+rim.holes in {24,32,36};
+rim.weight in [100..300];
+rim.cost in [30..300];
+
+spokes.length in [1..20];
+spokes.count in [0..100];
+
+/* Hub type
+	1 front hub
+	2 dynamo hub
+	3 freehub
+	4 gear hub
+*/
+hub.type in [1..4];
+hub.diameter in [5..10];
+hub.holes in {24,32,36};
+hub.hasdisc boolean;
+hub.gears in {0,3,7};
+hub.spline in [0..2][7..10];
+hub.weight in [50..1000];
+hub.cost in [30..300];
+
+tire.diameter in {16,20,24,26};
+tire.weight in [80..150];
+tire.cost in [20..40];
+
+tube.diameter in {16,20,24,26};
+
+solidtire.diameter in {16,20,24,26};
+solidtire.weight in [150..300];
+solidtire.cost in [280..300];
+
+chain.weight in [150..150];
+chain.cost in [100..100];
+
+belt.weight in [50..50];
+belt.cost in [400..400];
+
+shifter.gears in [2..10];
+shifter.cost in [30..100];
+
+seatpost.material in [1..3];
+seatpost.weight in [100..300];
+seatpost.cost in [50..150];
+
+saddle.weight in [500..1000];
+saddle.cost in [100..300];
+
+/* Brake type
+	1 rim brake
+	2 disc brake
+*/
+brake.type in [1..2];
+brake.weight in [25..100];
+brake.cost in [50..200];
+
+chainrings.count in [1..3];
+
+/* Derailleur type:
+	1 front
+	2 rear
+*/
+
+derailleur.type in [1..2];
+derailleur.gears in [2..10];
+
+sprockets.count in [1..10];
+sprockets.cost in [50..200];
+
+rim#0.diameter==rim#1.diameter;
+
+rim#0.holes==hub#0.holes;
+rim#0.holes==spokes#0.count;
+rim#0.material==3 -> brake#0.type!=2;
+hub#0.type==1 or hub#0.type==2;
+brake#0.type==2 -> frame.hasdisc and hub#0.hasdisc;
+(rim#0.diameter-hub#0.diameter)/2+1==spokes#0.length;
+rim#0.diameter==tire#0.diameter;
+tire#0.diameter==tube#0.diameter;
+
+rim#1.holes==hub#1.holes;
+rim#1.holes==spokes#1.count;
+rim#1.material==3 -> not brake#1.type!=2;
+hub#1.type==3 or hub#1.type==4;
+brake#1.type==2 -> frame.hasdisc and hub#1.hasdisc;
+(rim#1.diameter-hub#1.diameter)/2+1==spokes#1.length;
+rim#1.diameter==tire#1.diameter;
+tire#1.diameter==tube#1.diameter;
+
+shifter#0 requires shifter#0.gears==chainrings.count or shifter#0.gears==hub#1.gears;
+shifter#1 requires shifter#1.gears==sprockets.count;
+
+chainrings.count>1 -> derailleur#0.type==1;
+sprockets.count>1 -> derailleur#1.type==2;
+
+sprockets.count>7 -> chainrings.count<3;
+chainrings.count>sprockets.count -> hub#1.gears>0;
+
+derailleur#0 requires shifter#0.gears==derailleur#0.gears and hub#1.gears==0;
+derailleur#1 requires shifter#1.gears==derailleur#1.gears;
+derailleur#1 requires tensioner;
+
+chain requires sprockets and chainrings;
+
+belt excludes derailleur#0;
+belt excludes derailleur#1;
+belt requires pulley and crankpulley;
+
+sprockets requires hub#1.spline>=sprockets.count;
+
+frame.material==3 <-> seatpost.material==3;
+
+hub#0.spline==0;
+
+//inventory
+
+inventory(:frame,frame._);
+inventory(:brake,brake#0._);
+inventory(:brake,brake#1._);
+inventory(:rim,rim#0._);
+inventory(:rim,rim#1._);
+inventory(:hub,hub#0._);
+inventory(:hub,hub#1._);
+inventory(:tire,tire#0._);
+inventory(:tire,tire#1._);
+inventory(:solidtire,solidtire#0._);
+inventory(:solidtire,solidtire#1._);
+inventory(:chain,chain._);
+inventory(:belt,belt._);
+inventory(:shifter,shifter#0._);
+inventory(:shifter,shifter#1._);
+inventory(:seatpost,seatpost._);
+inventory(:saddle,saddle._);
+inventory(:sprockets,sprockets._);

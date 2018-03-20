@@ -5,8 +5,8 @@ bike [2..2] brake;
 bike ! seat;
 bike ? accessories;
 
-bike.total_cost in [1..100000];
-sum_eq(bike.total_cost,_.cost);
+bike.total_cost in [1..100000]; bike.total_weight in [1..30000];
+sum_eq(bike.total_cost,_.cost); sum_eq(bike.total_weight,_.weight);
 
 wheel ! rim;
 wheel ! spokes;

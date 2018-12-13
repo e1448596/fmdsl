@@ -1,0 +1,11 @@
+deps
+*.o
+*_string.h
+compiler.exe
+compiler
+makestring.exe
+makestring
+grammar.h
+grammar.c
+grammar.out
+lexer.c

@@ -5,9 +5,10 @@ CFLAGS := -g -Wall
 SRC := grammar.c lexer.c $(wildcard *.c)
 
 .PHONY: all
-all: compiler
+all: compiler.exe
 
-compiler: $(SRC:%.c=%.o)
+compiler.exe: $(SRC:%.c=%.o)
+	$(CC) $^ -o $@
 
 makestring.exe: makestring._c
 	$(CC) -x c $< -o $@

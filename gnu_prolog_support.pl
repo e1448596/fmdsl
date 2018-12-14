@@ -79,21 +79,34 @@ product_valid_inner(Features,Attributes,Filters,Goal):-
 product_valid(Product,Filters,Goal):-product_model(1,Features,Attributes),
 									product_valid_inner(Features,Attributes,Filters,Goal),
 									build_configuration(Product,Features,Attributes).
+product_valid(Product,Filters):-product_valid(Product,Filters,true).
+product_valid(Product):-product_valid(Product,[],true).
 
 product_count(Count,Filters,Goal):-findall(0,product_valid(_,Filters,Goal),L),length(L,Count).
+product_count(Count,Filters):-product_count(Count,Filters,true).
+product_count(Count):-product_count(Count,[],true).
 
 features_core(Core,Filters,Goal):-var(Core),product_model(1,Features,Attributes),
 											product_descriptor(Features,Attributes,FeatureDict,_),
 											findall(F,(member(F-_,FeatureDict),\+product_valid_inner(Features,Attributes,[-F|Filters],Goal)),Core).
+features_core(Core,Filters):-features_core(Core,Filters,true).
+features_core(Core):-features_core(Core,[],true).
 
 features_dead(Dead,Filters,Goal):-var(Dead),product_model(1,Features,Attributes),
 											product_descriptor(Features,Attributes,FeatureDict,_),
 											findall(F,(member(F-_,FeatureDict),\+product_valid_inner(Features,Attributes,[+F|Filters],Goal)),Dead).
-											
+features_dead(Dead,Filters):-features_dead(Dead,Filters,true).
+features_dead(Dead):-features_dead(Dead,[],true).
+
 features_optional(Opt,Filters,Goal):-var(Opt),features_dead(Dead,Filters,Goal),features_core(Core,Filters,Goal),
 												product_descriptor(_,_,FeatureDict,_),
 												findall(Feature,(member(Feature-_,FeatureDict),\+memberchk(Feature,Core),\+memberchk(Feature,Dead)),Opt).
+features_optional(Opt,Filters):-features_optional(Opt,Filters,true).
+features_optional(Opt):-features_optional(Opt,[],true).
 
 product_configuration(P):-product_descriptor(_,_,FeatureDict,AttrDict),
 						findall(Item,(member(Feature-_,FeatureDict),
 										(memberchk(Feature-ValDict,AttrDict)->findall(Key-_,member(Key-_,ValDict),Keys),Item=Feature-Keys;Item=Feature)),P).
+
+attribute_features(Features,Attribute):-product_descriptor(_,_,_,AttrDict),
+									findall(Feature,(member(Feature-ValDict,AttrDict),memberchk(Attribute-_,ValDict)),Features).

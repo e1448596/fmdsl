@@ -4,7 +4,7 @@ public:
 	virtual IntVarBranch branchAttrVar(){return INT_VAR_AFC_MAX();}
 	virtual IntValBranch branchAttrVal(){return INT_VAL_SPLIT_MIN();}
 	virtual Search::Options searchOptions(){Search::Options o;o.threads=0;return o;}
-	virtual Space* copy(bool _share){return new Model(_share,*this);}
+	virtual Space* copy(){return new Model(*this);}
 	
 	void sum_eq(IntVar s,IntVarArgs& a){
 		rel(*this,s==sum(a));

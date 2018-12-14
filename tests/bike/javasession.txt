@@ -1,8 +1,6 @@
-javac -cp .\choco4.jar -d . .\Bike.java
-
-jshell.exe --class-path=".;choco4.jar"
-
 import product.Bike
 Bike b=new Bike();
 Bike.Analysis a=b.new Analysis();
+
 a.count();
+b.getSolver().printStatistics();

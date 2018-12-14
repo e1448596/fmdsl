@@ -1,0 +1,40 @@
+all: biketest6.exe bike.pl product
+
+biketest6.exe: bike6.cpp
+	g++ -O2 -I gecode-6.1.0/include -L gecode-6.1.0/lib bike6.cpp -lgecodesearch -lgecodeminimodel -lgecodeset -lgecodefloat -lgecodeint -lgecodekernel -lgecodesupport -o biketest6
+
+biketest5.exe: bike5.cpp
+	g++ -O2 -I gecode-5.1.0/include -L gecode-5.1.0/lib bike5.cpp -lgecodesearch -lgecodeminimodel -lgecodeset -lgecodefloat -lgecodeint -lgecodekernel -lgecodesupport -o biketest5
+
+product: Bike.java
+	javac -cp choco-solver-4.10.0.jar -d . Bike.java
+
+bike.pl: inventory.pl bike.txt
+	../../compiler.exe -t inventory.pl bike.txt bike.pl
+
+bike6.cpp: inventory6.cpp bike.txt
+	../../compiler.exe -g6 -t inventory6.cpp bike.txt bike6.cpp
+
+bike5.cpp: inventory5.cpp bike.txt
+	../../compiler.exe -g5 -t inventory5.cpp bike.txt bike5.cpp
+
+Bike.java: inventory.java bike.txt
+	../../compiler.exe -c4 -t inventory.java bike.txt Bike.java
+
+.PHONY: jshell
+jshell: product
+	jshell.exe --class-path=".;choco-solver-4.10.0.jar" javasession.txt
+
+.PHONY: gecode6
+gecode6: biketest6.exe
+	powershell -command "measure-command {.\biketest6.exe | out-default}"
+
+.PHONY: clean
+clean:
+	-del biketest5.exe
+	-del biketest6.exe
+	-del bike5.cpp
+	-del bike6.cpp
+	-del bike.pl
+	-rd /S /Q product
+	-del Bike.java

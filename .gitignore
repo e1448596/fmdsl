@@ -9,3 +9,8 @@ grammar.h
 grammar.c
 grammar.out
 lexer.c
+
+tests/bike/*
+!tests/bike/*.txt
+!tests/bike/Makefile
+!tests/bike/inventory*

@@ -140,8 +140,13 @@ public:
 };
 
 int main(int argc,char** argv){
-	Bike bike;
-	Bike::Analysis a(&bike);
-	cout<<a.count()<<endl;
+	try{
+		Bike bike;
+		Bike::Analysis a(&bike);
+		cout<<a.count()<<endl;
+	}
+	catch(Exception e){
+		cerr <<"Gecode exception:"<<e.what()<<endl;
+	}
 	return 0;
 }

@@ -1,9 +1,0 @@
-biketest: bike.cpp
-	g++ -O2 -std=c++11 -I gecode5/include -L gecode5/lib bike.cpp -lgecodesearch -lgecodeminimodel -lgecodeset -lgecodefloat -lgecodeint -lgecodekernel -lgecodesupport -o biketest
-
-bike.cpp: inventory.cpp bike.txt
-	bin/compiler.exe -c -t inventory.cpp bike.txt bike.cpp
-
-.PHONY: clean
-clean:
-	-del biketest.exe

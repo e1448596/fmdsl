@@ -9,6 +9,7 @@
 #include "gnu_prolog_emit.h"
 #include "choco4_emit.h"
 #include "gecode5_emit.h"
+#include "gecode6_emit.h"
 
 typedef struct {
 	char* input;
@@ -61,26 +62,27 @@ static Options get_options(int argc,char** argv){
 	Options o={0,0,0,0,gnu_prolog_emit};
 	for(int i=1;i<argc;++i){
 		if(argv[i][0]=='-'){
-			switch(argv[i][1]){
-			case 't':
+			if(0==strcmp(argv[i],"-t")){
 				++i;
 				if(i<argc) o.template=argv[i];
-				break;
-			case 'c':
-				o.cb=gecode5_emit;
-				o.default_template=default_template(argv[0],"gecode5_template.cpp");
-				break;
-			case 'j':
-				o.cb=choco4_emit;
-				o.default_template=default_template(argv[0],"choco4_template.java");
-				break;
-			case 'p':
+			}
+			else if(0==strcmp(argv[i],"-p")){
 				o.cb=gnu_prolog_emit;
 				o.default_template=0;
-				break;
-			default:
-				fprintf(stderr,"Unrecognized option %s. Ignored.\n",argv[i]);
 			}
+			else if(0==strcmp(argv[i],"-c4")){
+				o.cb=choco4_emit;
+				o.default_template=default_template(argv[0],"choco4_template.java");
+			}
+			else if(0==strcmp(argv[i],"-g5")){
+				o.cb=gecode5_emit;
+				o.default_template=0;
+			}
+			else if(0==strcmp(argv[i],"-g6")){
+				o.cb=gecode6_emit;
+				o.default_template=0;
+			}
+			else fprintf(stderr,"Unrecognized option %s. Ignored.\n",argv[i]);
 		}
 		else if(!o.input){
 			o.input=argv[i];
@@ -100,10 +102,11 @@ int main(int argc,char** argv){
 	int length=0;
 
 	if(argc<2){
-		fprintf(stderr,"Usage: %s [-t template][-jpc] input [output]\nOptions:\n\t-t\tTemplate file with marker %s replaced with the output.\n"
+		fprintf(stderr,"Usage: %s [-t template][-p][-c4][-g5][-g6] input [output]\nOptions:\n\t-t\tTemplate file with marker %s replaced with the output.\n"
 		"\t-p\tOutput in GNU prolog. (default)\n"
-		"\t-j\tOutput in java for Choco 4.\n"
-		"\t-c\tOutput in C++ for Gecode 5.\n"
+		"\t-c4\tOutput in java for Choco 4.\n"
+		"\t-g5\tOutput in C++ for Gecode 5.\n"
+		"\t-g6\tOutput in C++ for Gecode 6.\n"
 		"\n",argv[0],MARKER);
 		return 0;
 	}

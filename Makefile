@@ -3,9 +3,10 @@ CFLAGS := -g -Wall
 SRC := grammar.c lexer.c $(wildcard *.c)
 
 .PHONY: all
-all: compiler
+all: fmdsl
 
-compiler: $(SRC:%.c=%.o)
+fmdsl: $(SRC:%.c=%.o)
+	$(CC) $^ -o $@
 
 makestring: makestring._c
 	$(CC) -x c $< -o $@
@@ -29,7 +30,7 @@ clean:
 	-rm *.o
 	-rm *_string.h
 	-rm makestring
-	-rm compiler
+	-rm fmdsl
 
 .PHONY: veryclean
 veryclean: clean
@@ -38,3 +39,4 @@ veryclean: clean
 	-rm grammar.out
 	-rm lexer.c
 	-rm deps
+	$(MAKE) -C tests/bike/ clean

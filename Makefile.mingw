@@ -5,9 +5,9 @@ CFLAGS := -g -Wall
 SRC := grammar.c lexer.c $(wildcard *.c)
 
 .PHONY: all
-all: compiler.exe
+all: fmdsl.exe
 
-compiler.exe: $(SRC:%.c=%.o)
+fmdsl.exe: $(SRC:%.c=%.o)
 	$(CC) $^ -o $@
 
 makestring.exe: makestring._c
@@ -31,7 +31,7 @@ deps: $(SRC)
 clean:
 	-del *.o
 	-del *_string.h
-	-del compiler.exe
+	-del fmdsl.exe
 	-del makestring.exe
 
 .PHONY: veryclean
@@ -41,3 +41,4 @@ veryclean: clean
 	-del grammar.c
 	-del grammar.out
 	-del lexer.c
+	$(MAKE) -C tests/bike/ -f Makefile.mingw clean

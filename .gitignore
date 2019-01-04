@@ -12,5 +12,5 @@ lexer.c
 
 tests/bike/*
 !tests/bike/*.txt
-!tests/bike/Makefile
+!tests/bike/Makefile*
 !tests/bike/inventory*
